@@ -16,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -25,8 +27,8 @@ public class CityActivity extends AppCompatActivity {
     private TextView textView;
     private Button button;
     private ListView listView;
-    private String[] data=new String[100];
-//    private String[] data={"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
+//    private String[] data=new String[100];
+    private List<String> data=new ArrayList<>();
     private int[] cids=new int[100];
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,13 +40,13 @@ public class CityActivity extends AppCompatActivity {
         this.textView=(TextView) findViewById(R.id.abc);
 //        this.button = (Button)findViewById(R.id.button);
         this.listView = (ListView) findViewById(R.id.list_view1);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(CityActivity.this,android.R.layout.simple_list_item_1,data);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(CityActivity.this,android.R.layout.simple_list_item_1,data);
         ListView listView = (ListView) findViewById(R.id.list_view1);
         listView.setAdapter(adapter);
         this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v("点击哪一个",""+position+":"+CityActivity.this.cids[position]+":"+CityActivity.this.data[position]);
+                Log.v("点击哪一个",""+position+":"+CityActivity.this.cids[position]+":"+CityActivity.this.data.get(position));
                 Intent intent = new Intent(CityActivity.this,CountyActivity.class);
                 intent.putExtra("cid",CityActivity.this.cids[position]);
                 intent.putExtra("pid",pid);
@@ -66,13 +68,13 @@ public class CityActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText = response.body().string();
                 String[] result=parseJSONObject(responseText);
-                CityActivity.this.data = result;
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 //                        textView.setText(responseText);
-//                    }
-//                });
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
             @Override
             public void onFailure(Call call, IOException e) {
@@ -82,12 +84,13 @@ public class CityActivity extends AppCompatActivity {
     }
     private String[] parseJSONObject(String responseText)  {
         JSONArray jsonArray = null;
+        this.data.clear();
         try {
             jsonArray = new JSONArray(responseText);
             String[] result = new String[jsonArray.length()];
             for (int i = 0; i<jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                this.data[i] = jsonObject.getString("name");
+                this.data.add(jsonObject.getString("name"));
                 this.cids[i] = jsonObject.getInt("id");
             }
             return result;

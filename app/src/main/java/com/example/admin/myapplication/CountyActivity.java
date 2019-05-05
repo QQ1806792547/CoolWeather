@@ -16,6 +16,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -25,9 +27,9 @@ public class CountyActivity extends AppCompatActivity {
     private Button button;
     private ListView listView;
     //    private String[] data=new String[100];
-    private String[] data={"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
-    private String[] wids=new String[100];
-//    private String[] wids={"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
+    private List<String> data=new ArrayList<>();
+//    private String[] wids=new String[100];
+    private String[] wids={"","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,13 +43,13 @@ public class CountyActivity extends AppCompatActivity {
         this.textView=(TextView) findViewById(R.id.abc);
 //        this.button = (Button)findViewById(R.id.button);
         this.listView = (ListView) findViewById(R.id.list_view2);
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(CountyActivity.this,android.R.layout.simple_list_item_1,data);
+        final ArrayAdapter<String> adapter = new ArrayAdapter<String>(CountyActivity.this,android.R.layout.simple_list_item_1,data);
         ListView listView = (ListView) findViewById(R.id.list_view2);
         listView.setAdapter(adapter);
         this.listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.v("点击哪一个",""+position+":"+CountyActivity.this.wids[position]+":"+CountyActivity.this.data[position]);
+                Log.v("点击哪一个",""+position+":"+CountyActivity.this.wids[position]+":"+CountyActivity.this.data.get(position));
                 Intent intent = new Intent(CountyActivity.this,WeatherActivity.class);
                 intent.putExtra("wid",CountyActivity.this.wids[position]);
                 startActivity(intent);
@@ -68,13 +70,13 @@ public class CountyActivity extends AppCompatActivity {
             public void onResponse(Call call, Response response) throws IOException {
                 final String responseText = response.body().string();
                 String[] result=parseJSONObject(responseText);
-                CountyActivity.this.data = result;
-//                runOnUiThread(new Runnable() {
-//                    @Override
-//                    public void run() {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
 //                        textView.setText(responseText);
-//                    }
-//                });
+                        adapter.notifyDataSetChanged();
+                    }
+                });
             }
             @Override
             public void onFailure(Call call, IOException e) {
@@ -84,12 +86,13 @@ public class CountyActivity extends AppCompatActivity {
     }
     private String[] parseJSONObject(String responseText)  {
         JSONArray jsonArray = null;
+        this.data.clear();
         try {
             jsonArray = new JSONArray(responseText);
             String[] result = new String[jsonArray.length()];
             for (int i = 0; i<jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                this.data[i] = jsonObject.getString("name");
+                this.data.add(jsonObject.getString("name"));
                 this.wids[i] = jsonObject.getString("weather_id");
             }
             return result;
