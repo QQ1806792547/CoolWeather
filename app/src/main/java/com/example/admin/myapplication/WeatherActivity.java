@@ -34,15 +34,6 @@ public class WeatherActivity extends AppCompatActivity {
         Intent intent = getIntent();
         String wid = getIntent().getStringExtra("wid");
         this.textView=(TextView) findViewById(R.id.abcd);
-//        this.button = (Button)findViewById(R.id.button1);
-//        ArrayAdapter<String> adapter = new ArrayAdapter<String>(WeatherActivity.this,android.R.layout.simple_list_item_1,data);
-//        listView.setAdapter(adapter);
-//        this.button.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                startActivity(new Intent(WeatherActivity.this,CityActivity.class));
-//            }
-//        });CN101210709
 
         String weatherUrl = "http://guolin.tech/api/weather?cityid="+ wid +"&key=284c0b03c7a247dd8fb171e45f2e0a1e";
         HttpUtil.sendOkHttpRequest(weatherUrl, new Callback() {
